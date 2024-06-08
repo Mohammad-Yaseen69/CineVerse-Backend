@@ -29,7 +29,6 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.checkPassword = async function (password) {
     try {
         const response = await bcrypt.compare(password, this.password)
-        console.log(response, password)
         return response
     } catch (error) {
         console.log(error.message)
@@ -37,7 +36,7 @@ userSchema.methods.checkPassword = async function (password) {
 }
 
 userSchema.methods.generateAccessToken = async function () {
-    jwt.sign(
+    const accessToken = jwt.sign(
         {
             name: this.name,
             email: this.email,
@@ -48,16 +47,20 @@ userSchema.methods.generateAccessToken = async function () {
             expiresIn: process.env.ACCESS_TOKEN_EXPIRE
         }
     )
+
+    return accessToken
 }
 
 userSchema.methods.generateRefreshToken = async function () {
-    jwt.sign(
+    const refreshToken =  jwt.sign(
         { id: this._id },
         process.env.REFRESH_TOKEN_KEY,
         {
             expiresIn: process.env.REFRESH_TOKEN_EXPIRE
         }
     )
+    
+    return refreshToken
 }
 
 
