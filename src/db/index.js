@@ -12,5 +12,12 @@ const connectDB = async () => {
     }
 }
 
+const disconnectDB = async () => {
+    try {
+        await mongoose.disconnect()
+    } catch (error) {
+        console.log(error)
+    }
+}
 
-export {connectDB}
+export {connectDB , disconnectDB}
