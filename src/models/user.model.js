@@ -2,6 +2,17 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
+const chatSchema = new mongoose.Schema({
+    content : {
+        type : String,
+        required : true
+    },
+    role : {
+        type : String,
+        required : true
+    }
+} , {timestamps : true})
+
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -17,6 +28,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    verified : {
+        type : Boolean,
+        default : false
+    },
+    chats : [chatSchema],
     refreshToken: String
 }, { timestamps: true })
 

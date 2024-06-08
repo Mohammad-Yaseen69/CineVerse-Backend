@@ -2,8 +2,9 @@ import { User } from "../models/user.model.js";
 import { ApiResponse } from '../utils/ApiResponse.js'
 import { ApiError } from '../utils/ApiError.js'
 import { asyncHandler } from '../utils/AsyncHandler.js'
-
-
+import { sendEmail } from '../utils/sendEmail.js'
+import { Token } from '../models/token.models.js'
+import crypto from 'crypto'
 
 const options = {
     httpOnly: true,
@@ -55,6 +56,15 @@ const createUser = asyncHandler(async (req, res) => {
 
     const user = await User.create({ name, password, email });
 
+    const token = await Token.create({
+        userId: user._id,
+        token: crypto.randomBytes(32).toString("hex")
+    })
+
+    const url = `${process.env.BASE_URL}users/${user._id}/verify/${token.token}`
+
+    await sendEmail(user.email, "Verify Email", url)
+
     if (!user) {
         throw new ApiError(400, "User not created")
     }
@@ -62,7 +72,7 @@ const createUser = asyncHandler(async (req, res) => {
     const createdUser = await User.findById(user._id).select("-password -refreshToken")
 
     return res.status(200).json(
-        new ApiResponse(200, createdUser, "User Created Successfully")
+        new ApiResponse(200, createdUser, "User Created Successfully and An Email Send to your account please verify")
     )
 })
 
@@ -78,6 +88,16 @@ const loginUser = asyncHandler(async (req, res) => {
 
     if (!user) {
         throw new ApiError(400, "User not found")
+    }
+
+    if(!user.verified){
+        let token = await Token.findOne({userId : user._id})
+        if(!token){
+            token = await Token.create({userId : user._id, token : crypto.randomBytes(32).toString("hex")})
+            const url = `${process.env.BASE_URL}users/${user._id}/verify/${token.token}`
+            await sendEmail(user.email, "Verify Email", url)
+        }
+        throw new ApiError(400, "Please verify your email, If you can't get verify email then your email must be invalid")
     }
 
 
@@ -106,17 +126,75 @@ const loginUser = asyncHandler(async (req, res) => {
 const logoutUser = asyncHandler(async (req, res) => {
     const user = req.user?._id;
 
-    await User.findByIdAndUpdate(user._id , {
-        $unset: {refreshToken : ""}
+    await User.findByIdAndUpdate(user._id, {
+        $unset: { refreshToken: "" }
     })
 
     res.status(200)
-    .clearCookie("refreshToken")
-    .clearCookie("accessToken")
-    .json(
-        new ApiResponse(200, {}, "User logged out successfully")
+        .clearCookie("refreshToken")
+        .clearCookie("accessToken")
+        .json(
+            new ApiResponse(200, {}, "User logged out successfully")
+        )
+})
+
+const getAllUser = asyncHandler(async (req, res) => {
+    const users = await User.find()
+
+    res.status(200).json(
+        new ApiResponse(200, users, "Users fetched successfully")
     )
 })
 
+const getCurrentUser = asyncHandler(async (req, res) => {
+    const user = req.user;
 
-export { createUser, loginUser ,logoutUser}
+    res.status(200).json(
+        new ApiResponse(200, user, "User fetched successfully")
+    )
+})
+
+const verification = asyncHandler(async (req ,res) => {
+    const { userId, token } = req.params;
+
+
+    const user = await User.findById(userId)
+
+    if (!user) {
+        throw new ApiError(400, "User not found")
+    }
+
+    const tokenFound = await Token.findOne({ userId: user._id, token })
+
+    if (!tokenFound) {
+        throw new ApiError(400, "Invalid token")
+    }
+
+    user.verified = true;
+
+    await user.save()
+
+    await tokenFound.deleteOne()
+
+    res.status(200).json(
+        new ApiResponse(200, {}, "User verified successfully")
+    )
+})
+
+const resetPassword = asyncHandler(async (req, res) => {
+    const { newPassword, confirmPassword } = req.body
+
+
+})
+
+
+
+export {
+    createUser,
+    loginUser,
+    logoutUser,
+    getAllUser,
+    getCurrentUser,
+    verification,
+    resetPassword
+}
