@@ -26,16 +26,17 @@ userSchema.pre("save", async function (next) {
     this.password = await bcrypt.hash(this.password, 10)
 })
 
-userSchema.methods.checkPassword = async (password) => {
+userSchema.methods.checkPassword = async function (password) {
     try {
         const response = await bcrypt.compare(password, this.password)
+        console.log(response, password)
         return response
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
 }
 
-userSchema.methods.generateAccessToken = async () => {
+userSchema.methods.generateAccessToken = async function () {
     jwt.sign(
         {
             name: this.name,
@@ -49,9 +50,9 @@ userSchema.methods.generateAccessToken = async () => {
     )
 }
 
-userSchema.methods.generateRefreshToken = async () => {
+userSchema.methods.generateRefreshToken = async function () {
     jwt.sign(
-        {id : this._id},
+        { id: this._id },
         process.env.REFRESH_TOKEN_KEY,
         {
             expiresIn: process.env.REFRESH_TOKEN_EXPIRE
