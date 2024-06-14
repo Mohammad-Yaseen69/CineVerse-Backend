@@ -86,6 +86,7 @@ const loginUser = asyncHandler(async (req, res) => {
     if (!email || !password) {
         throw new ApiError(400, "Please provide all the details")
     }
+    let isVerified = true
 
     const user = await User.findOne({ email })
 
@@ -100,7 +101,8 @@ const loginUser = asyncHandler(async (req, res) => {
             const url = `${process.env.BASE_URL}users/${user._id}/verify/${token.token}`
             await sendEmail(user.email, "Verify Email", url)
         }
-        throw new ApiError(400, "Please verify your email, If you can't get verify email then your email must be invalid")
+
+        isVerified = false
     }
 
 
@@ -122,7 +124,7 @@ const loginUser = asyncHandler(async (req, res) => {
         .cookie("refreshToken", refreshToken, options)
         .cookie("accessToken", acccessToken, options)
         .json(
-            new ApiResponse(200, user, "User logged in successfully")
+            new ApiResponse(200, user, `User logged in successfully${isVerified ? "" :"and Please verify your email,"}`)
         )
 })
 
