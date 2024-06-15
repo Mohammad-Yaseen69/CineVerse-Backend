@@ -19,6 +19,9 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
         throw new ApiError(400, "User not found")
     }
 
+
+    
+    req.expiresIn = decodedToken.exp
     req.user = user
 
     next()

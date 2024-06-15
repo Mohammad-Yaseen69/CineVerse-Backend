@@ -124,7 +124,7 @@ const loginUser = asyncHandler(async (req, res) => {
         .cookie("refreshToken", refreshToken, options)
         .cookie("accessToken", acccessToken, options)
         .json(
-            new ApiResponse(200, user, `User logged in successfully${isVerified ? "" :"and Please verify your email,"}`)
+            new ApiResponse(200, user, `User logged in successfully${isVerified ? "" :" and Please verify your email,"}`)
         )
 })
 
@@ -184,7 +184,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     const user = req.user;
 
     res.status(200).json(
-        new ApiResponse(200, user, "User fetched successfully")
+        new ApiResponse(200, {user , expiresIn : req.expiresIn}, "User fetched successfully")
     )
 })
 
