@@ -18,15 +18,12 @@ const router = Router()
 router.post('/', createUser).get('/', verifyJWT, getCurrentUser)
 router.post('/login', loginUser)
 router.get('/:userId/verify/:token', verification)
-
+router.post('/forgot-password', forgotPassword)
+router.put('/reset-password', resetPassword)
+router.post('/verify-otp', verifyOTP)
 // Protected Routes
 router.post('/logout', verifyJWT, logoutUser)
 router.get('/all', verifyJWT, getAllUser)
-router.post('/forgot-password', verifyJWT, forgotPassword)
 router.post('/refresh-token', verifyJWT, refreshAccessToken)
-router.put('/reset-password', verifyJWT, resetPassword)
-router.post('/verify-otp', verifyJWT, verifyOTP)
-
-
 
 export default router

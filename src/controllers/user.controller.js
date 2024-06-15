@@ -124,7 +124,7 @@ const loginUser = asyncHandler(async (req, res) => {
         .cookie("refreshToken", refreshToken, options)
         .cookie("accessToken", acccessToken, options)
         .json(
-            new ApiResponse(200, user, `User logged in successfully${isVerified ? "" :" and Please verify your email,"}`)
+            new ApiResponse(200, user, `User logged in successfully${isVerified ? "" : " and Please verify your email,"}`)
         )
 })
 
@@ -184,7 +184,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     const user = req.user;
 
     res.status(200).json(
-        new ApiResponse(200, {user , expiresIn : req.expiresIn}, "User fetched successfully")
+        new ApiResponse(200, { user, expiresIn: req.expiresIn }, "User fetched successfully")
     )
 })
 
@@ -219,19 +219,20 @@ const forgotPassword = asyncHandler(async (req, res) => {
     const { email } = req.body;
 
 
-    if(!email){
-        throw new ApiError(400,"Please provide your email address")
+    if (!email) {
+        throw new ApiError(400, "Please provide your email address")
     }
 
     const user = await User.findOne({ email })
 
-    if (!user.verified) {
-        throw new ApiError(400, "Email not verified")
-    }
-
     if (!user) {
         throw new ApiError(400, "Invalid Email")
     }
+
+    if (!user?.verified) {
+        throw new ApiError(400, "Email not verified")
+    }
+
 
     const otpExist = await OTP.findOne({ email })
 
@@ -248,17 +249,16 @@ const forgotPassword = asyncHandler(async (req, res) => {
     <p style="font-family: Arial, sans-serif;">Use the following OTP to complete your process:</p>
     <p style="font-size: 24px; font-weight: bold; color: #333;">${otp}</p>
     <p style="font-family: Arial, sans-serif;">This OTP will expire in <span style="color: #ff0000; font-weight: bold;">1 hour</span>.</p>`
-)
+    )
 
 
-res.status(200).json(
-    new ApiResponse(200, {}, "OTP send successfully")
-)
+    res.status(200).json(
+        new ApiResponse(200, { email }, "OTP send successfully")
+    )
 })
 
 const verifyOTP = asyncHandler(async (req, res) => {
     const { otp } = req.body;
-    const user = req.user;
 
     if (!otp) {
         throw new ApiError(400, "Please provide OTP")
@@ -266,17 +266,20 @@ const verifyOTP = asyncHandler(async (req, res) => {
 
     const otpExist = await OTP.findOne({ otp })
 
+
+
     if (!otpExist) {
-        throw new ApiError(400, "Invalid OTP")
+        throw new ApiError(400, "OTP not found")
     }
 
     if (otpExist.expireIn < Date.now()) {
         throw new ApiError(400, "OTP expired")
     }
 
-    if (otpExist.otp !== otp) {
-        throw new ApiError(400, "Invalid OTP")
+    if (otpExist.otp !== parseInt(otp)) {
+        throw new ApiError(400, "Invalid OTP!")
     }
+    const user = await User.findOne({ email: otpExist.email })
 
     user.otpVerified = true
 
@@ -290,25 +293,27 @@ const verifyOTP = asyncHandler(async (req, res) => {
 })
 
 const resetPassword = asyncHandler(async (req, res) => {
-    const { newPassword } = req.body;
-    const user = req.user;
+    const { newPassword , email } = req.body;
+    
+    const user = await User.findOne({ email })
 
     if (!newPassword) {
         throw new ApiError(400, "Please provide new password")
     }
 
-    if(!user.otpVerified){
+    if (!user.otpVerified) {
         throw new ApiError(400, "Please verify OTP")
     }
+
 
     user.password = newPassword
 
     await User.findByIdAndUpdate(user._id, {
-        password: newPassword,
         $unset: { otpVerified: "" }
     })
 
     await user.save()
+
 
     res.status(200).json(
         new ApiResponse(200, {}, "Password reset successfully")
