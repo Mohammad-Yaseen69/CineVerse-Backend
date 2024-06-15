@@ -64,7 +64,7 @@ const createUser = asyncHandler(async (req, res) => {
         token: crypto.randomBytes(32).toString("hex")
     })
 
-    const url = `${process.env.BASE_URL}users/${user._id}/verify/${token.token}`
+    const url = `${process.env.BASE_URL}/users/${user._id}/verify/${token.token}`
 
     await sendEmail(user.email, "Verify Email", url)
 
@@ -98,7 +98,7 @@ const loginUser = asyncHandler(async (req, res) => {
         let token = await Token.findOne({ userId: user._id })
         if (!token) {
             token = await Token.create({ userId: user._id, token: crypto.randomBytes(32).toString("hex") })
-            const url = `${process.env.BASE_URL}users/${user._id}/verify/${token.token}`
+            const url = `${process.env.BASE_URL}/users/${user._id}/verify/${token.token}`
             await sendEmail(user.email, "Verify Email", url)
         }
 
@@ -209,6 +209,9 @@ const verification = asyncHandler(async (req, res) => {
     await user.save()
 
     await tokenFound.deleteOne()
+
+    console.log(user)
+
 
     res.status(200).json(
         new ApiResponse(200, {}, "User verified successfully")
