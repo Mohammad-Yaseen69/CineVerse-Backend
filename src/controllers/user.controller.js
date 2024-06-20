@@ -37,9 +37,9 @@ const createAccess_RefreshToken = async (userId) => {
 
 
 const createUser = asyncHandler(async (req, res) => {
-    const { name, password, email } = req.body;
+    const { userName, password, email } = req.body;
 
-    if (!name || !password || !email) {
+    if (!userName || !password || !email) {
         throw new ApiError(400, "Please provide all the details")
     }
 
@@ -52,12 +52,17 @@ const createUser = asyncHandler(async (req, res) => {
     }
 
     const existedUser = await User.findOne({ email })
+    const existedUserName = await User.findOne({ userName })
+
+    if (existedUserName) {
+        throw new ApiError(400, "This Username is taken")
+    }
 
     if (existedUser) {
         throw new ApiError(400, "User already exists")
     }
 
-    const user = await User.create({ name, password, email });
+    const user = await User.create({ userName, password, email });
 
     const token = await Token.create({
         userId: user._id,
@@ -296,8 +301,8 @@ const verifyOTP = asyncHandler(async (req, res) => {
 })
 
 const resetPassword = asyncHandler(async (req, res) => {
-    const { newPassword , email } = req.body;
-    
+    const { newPassword, email } = req.body;
+
     const user = await User.findOne({ email })
 
     if (!newPassword) {
@@ -322,7 +327,6 @@ const resetPassword = asyncHandler(async (req, res) => {
         new ApiResponse(200, {}, "Password reset successfully")
     )
 })
-
 
 
 

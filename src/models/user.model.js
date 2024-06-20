@@ -2,21 +2,12 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
-const chatSchema = new mongoose.Schema({
-    content : {
-        type : String,
-        required : true
-    },
-    role : {
-        type : String,
-        required : true
-    }
-} , {timestamps : true})
 
 const userSchema = new mongoose.Schema({
-    name: {
+    userName: {
         type: String,
         required: true,
+        unique: true
     },
     email: {
         type: String,
@@ -28,15 +19,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    verified : {
-        type : Boolean,
-        default : false
+    verified: {
+        type: Boolean,
+        default: false
     },
-    otpVerified : {
-        type : Boolean,
-        default : false
+    otpVerified: {
+        type: Boolean,
+        default: false
     },
-    chats : [chatSchema],
     refreshToken: String
 }, { timestamps: true })
 
@@ -72,14 +62,14 @@ userSchema.methods.generateAccessToken = async function () {
 }
 
 userSchema.methods.generateRefreshToken = async function () {
-    const refreshToken =  jwt.sign(
+    const refreshToken = jwt.sign(
         { id: this._id },
         process.env.REFRESH_TOKEN_KEY,
         {
             expiresIn: process.env.REFRESH_TOKEN_EXPIRE
         }
     )
-    
+
     return refreshToken
 }
 
