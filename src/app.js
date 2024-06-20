@@ -19,8 +19,13 @@ app.use(cors({
 // Routing
 
 import userRoute from './routes/user.routes.js'
+import genreRoute from "./routes/genre.routes.js"
+import mediaRoute from "./routes/media.routes.js"
+
 
 
 app.use("/api/v1/users" , userRoute)
+app.use("/api/v1/genres", genreRoute)
+app.use("/api/v1/media", mediaRoute)
 
 export default app
