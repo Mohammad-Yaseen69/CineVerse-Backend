@@ -1,1 +1,1 @@
-export const DB_NAME = "Chatbot"
+export const DB_NAME = "CineVerse"

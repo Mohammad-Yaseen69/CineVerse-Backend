@@ -118,3 +118,6 @@ dist
 .pnp.*
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
+
+# firebase config
+cineverse-106-firebase-adminsdk-82lua-4e0c284185.json
