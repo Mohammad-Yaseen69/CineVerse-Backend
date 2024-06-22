@@ -10,7 +10,7 @@ const castSchema = new mongoose.Schema({
     },
     roleType: {
         type: String,
-        enum: ["cast", "voiceActor"],
+        enum: ["cast", "voiceActor" , "writer" , "director"],
         required: true
     }
 })
@@ -45,7 +45,7 @@ const mediaSchema = new mongoose.Schema({
     },
     cast: [castSchema],
     duration: {
-        type: Number,
+        type: String,
         required: true
     },
     genre: [{
