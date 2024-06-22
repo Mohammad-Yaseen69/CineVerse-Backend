@@ -1,16 +1,7 @@
 import mongoose from "mongoose"
+import aggregatePaginate from "mongoose-aggregate-paginate-v2"
 
 
-const reviewSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
-    },
-    comment: {
-        type: String,
-        required: true
-    }
-}, { timestamps: true })
 
 const castSchema = new mongoose.Schema({
     name: {
@@ -24,14 +15,20 @@ const castSchema = new mongoose.Schema({
     }
 })
 
-const movieSchema = new mongoose.Schema({
+const mediaSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
     },
     img: {
-        type: String,
-        required: true
+        publicUrl: {
+            type: String,
+            required: true
+        },
+        filePath: {
+            type: String,
+            required: true
+        }
     },
     description: {
         type: String,
@@ -56,7 +53,7 @@ const movieSchema = new mongoose.Schema({
         ref: "Genre"
     }],
     language: {
-        type: String,
+        type: [String],
         required: true
     },
     type: {
@@ -64,8 +61,12 @@ const movieSchema = new mongoose.Schema({
         enum: ["movie", "series"],
         required: true
     },
-    reviews: [reviewSchema]
+    reviews: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Review"
+    }]
 }, { timestamps: true })
 
+mediaSchema.plugin(aggregatePaginate)
 
-export const Movie = mongoose.model("Movie", movieSchema)
+export const Media = mongoose.model("Media", mediaSchema)
