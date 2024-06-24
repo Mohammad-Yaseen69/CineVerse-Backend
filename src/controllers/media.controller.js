@@ -102,7 +102,7 @@ const createMedia = asyncHandler(async (req, res) => {
         name,
         description,
         cast,
-        releaseYear : Number(releaseYear),
+        releaseYear: Number(releaseYear),
         rating: Number(rating),
         duration: type === "movie" ? duration : duration + " per EP",
         genre: genresIds,
@@ -178,6 +178,48 @@ const getMedia = asyncHandler(async (req, res) => {
             }
         },
         {
+            $lookup: {
+                from: "reviews",
+                localField: "_id",
+                foreignField: "media",
+                as: "reviews",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "user",
+                            foreignField: "_id",
+                            as: "user",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        _id: 0,
+                                        userName: 1
+                                    }
+                                }
+                            ]
+                        },
+                    },
+                    {
+                        $unwind: "$user"
+                    },
+                    {
+                        $addFields: {
+                            likes: {
+                                $size: "$likes"
+                            },
+                            dislikes: {
+                                $size: "$dislikes"
+                            }
+                        }
+                    },
+                ]
+            }
+        },
+        {
+            $unwind: "$reviews"
+        },
+        {
             $project: {
                 _id: 1,
                 name: 1,
@@ -191,7 +233,8 @@ const getMedia = asyncHandler(async (req, res) => {
                 type: 1,
                 img: {
                     publicUrl: 1
-                }
+                },
+                reviews: 1,
             }
         }
     ])
@@ -320,7 +363,7 @@ const getAllMedia = asyncHandler(async (req, res) => {
 
 const searchMedia = asyncHandler(async (req, res) => {
     const { sortType, page = 1, limit = 10, query, genres = [], releaseYear, sortBy } = req.query;
-    
+
 
     let pipeline = [];
 
@@ -361,7 +404,7 @@ const searchMedia = asyncHandler(async (req, res) => {
     if (releaseYear) {
         pipeline.push({
             $match: {
-                releaseYear : Number(releaseYear)
+                releaseYear: Number(releaseYear)
             }
         });
     }

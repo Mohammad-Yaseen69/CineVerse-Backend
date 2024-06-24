@@ -61,10 +61,6 @@ const mediaSchema = new mongoose.Schema({
         enum: ["movie", "series"],
         required: true
     },
-    reviews: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Review"
-    }]
 }, { timestamps: true })
 
 mediaSchema.plugin(aggregatePaginate)

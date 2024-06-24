@@ -20,9 +20,13 @@ const reviewSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
-    comment: {
+    review: {
         type: String,
         required: true
+    },
+    media: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Media"
     },
     likes: [likeSchema],
     dislikes: [dislikeSchema]

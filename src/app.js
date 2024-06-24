@@ -21,11 +21,13 @@ app.use(cors({
 import userRoute from './routes/user.routes.js'
 import genreRoute from "./routes/genre.routes.js"
 import mediaRoute from "./routes/media.routes.js"
+import reviewRoute from "./routes/review.routes.js"
 
 
 
 app.use("/api/v1/users" , userRoute)
 app.use("/api/v1/genres", genreRoute)
 app.use("/api/v1/media", mediaRoute)
+app.use("/api/v1/reviews", reviewRoute)
 
 export default app
