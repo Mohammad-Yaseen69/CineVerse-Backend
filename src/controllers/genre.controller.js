@@ -20,7 +20,7 @@ const createGenre = asyncHandler(async (req, res) => {
     const alreadyExisted = await Genre.findOne({ name })
 
     if (alreadyExisted) {
-        throw new ApiError("Genre already existed")
+        throw new ApiError(400, "Genre already existed")
     }
 
     const genre = await Genre.create({ name })
@@ -60,17 +60,9 @@ const getAllGenre = asyncHandler(async (req, res) => {
 
     const aggregate = await Genre.aggregate([
         {
-            $group: {
-                _id: null,
-                genres: {
-                    $push: "$name"
-                }
-            },
-        },
-        {
             $project: {
-                _id: 0,
-                genres: 1
+                _id: 1,
+                name: 1
             }
         }
     ])
@@ -94,4 +86,4 @@ const getGenreByName = asyncHandler(async (req, res) => {
     )
 })
 
-export { createGenre, deleteGenre , getAllGenre, getGenreByName}
+export { createGenre, deleteGenre, getAllGenre, getGenreByName }
