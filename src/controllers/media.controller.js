@@ -45,7 +45,6 @@ const validation = ({ name, description, cast, releaseYear, rating, duration, ge
 
 
     for (const castObj of cast) {
-        console.log(castObj)
         if (!castObj.name || !castObj.roleType) {
             localPath && fs.unlinkSync(localPath)
             throw new ApiError(400, "Each Cast object must have name and role")
@@ -65,17 +64,30 @@ const createMedia = asyncHandler(async (req, res) => {
     const user = req?.user
     const imgLocalPath = req?.file?.path
 
+    let parsedObject = {}
+
+    if (cast && language && genres) {
+        parsedObject.cast = JSON.parse(cast)
+        parsedObject.language = JSON.parse(language)
+        parsedObject.genres = JSON.parse(genres)
+    }
+
+    console.log(imgLocalPath, req.body)
+
     if (!imgLocalPath) {
         throw new ApiError(400, "Image is required")
     }
 
-    validation(req.body, user, imgLocalPath)
+    validation({
+        ...req.body,
+        ...parsedObject
+    }, user, imgLocalPath)
 
     // Check if genre exists
 
     let genresIds = []
 
-    for (const genreName of genres) {
+    for (const genreName of JSON.parse(genres)) {
         const genre = await Genre.findOne({ name: genreName })
 
         if (!genre) {
@@ -85,6 +97,7 @@ const createMedia = asyncHandler(async (req, res) => {
         genresIds.push(genre._id)
     }
 
+    parsedObject.genres = genresIds
 
     const imgFirebaseUrl = await uploadFile(imgLocalPath)
 
@@ -101,14 +114,12 @@ const createMedia = asyncHandler(async (req, res) => {
     const newMedia = await Media.create({
         name,
         description,
-        cast,
         releaseYear: Number(releaseYear),
         rating: Number(rating),
         duration: type === "movie" ? duration : duration + " per EP",
-        genre: genresIds,
-        language,
         type,
-        img: imgObj
+        img: imgObj,
+        ...parsedObject
     })
 
     if (!newMedia) {
@@ -253,6 +264,12 @@ const editMedia = asyncHandler(async (req, res) => {
     const { name, description, cast, releaseYear, rating, duration, genres, language, type } = req.body
     const user = req?.user
     const file = req?.file
+
+    if (cast, language, genres) {
+        req.body.cast = JSON.parse(cast)
+        req.body.language = JSON.parse(language)
+        req.body.genres = JSON.parse(genres)
+    }
 
     validation(req.body, user, file?.path)
 

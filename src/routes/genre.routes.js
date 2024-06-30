@@ -4,10 +4,9 @@ import { createGenre, deleteGenre, getAllGenre, getGenreByName } from "../contro
 
 const router = Router()
 
-router.use(verifyJWT)
 
-router.post("/", createGenre)
-    .delete("/:id", deleteGenre)
+router.post("/", verifyJWT, createGenre)
+    .delete("/:id", verifyJWT, deleteGenre)
     .get("/", getAllGenre)
     .get("/:name", getGenreByName)
 

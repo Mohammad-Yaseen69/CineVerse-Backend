@@ -52,12 +52,6 @@ const deleteGenre = asyncHandler(async (req, res) => {
 })
 
 const getAllGenre = asyncHandler(async (req, res) => {
-    const user = req?.user
-
-    if (!user?.isAdmin) {
-        throw new ApiError(400, "You are not the admin")
-    }
-
     const aggregate = await Genre.aggregate([
         {
             $project: {
