@@ -87,6 +87,8 @@ const createMedia = asyncHandler(async (req, res) => {
 
     let genresIds = []
 
+    
+
     for (const genreName of JSON.parse(genres)) {
         const genre = await Genre.findOne({ name: genreName })
 
@@ -97,7 +99,9 @@ const createMedia = asyncHandler(async (req, res) => {
         genresIds.push(genre._id)
     }
 
-    parsedObject.genres = genresIds
+    parsedObject.genre = genresIds
+
+    console.log(parsedObject)
 
     const imgFirebaseUrl = await uploadFile(imgLocalPath)
 
