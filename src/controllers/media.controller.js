@@ -245,7 +245,6 @@ const getMedia = asyncHandler(async (req, res) => {
                 img: {
                     publicUrl: 1
                 },
-                reviews: 1,
             }
         }
     ])
@@ -355,6 +354,21 @@ const getAllMedia = asyncHandler(async (req, res) => {
             }
         },
         {
+            $lookup: {
+                from: "reviews",
+                localField: "_id",
+                foreignField: "media",
+                as: "reviews"
+            }
+        },
+        {
+            $addFields: {
+                reviews : {
+                    $size : "$reviews"
+                }
+            }
+        },
+        {
             $project: {
                 _id: 1,
                 name: 1,
@@ -368,7 +382,8 @@ const getAllMedia = asyncHandler(async (req, res) => {
                 type: 1,
                 img: {
                     publicUrl: 1
-                }
+                },
+                reviews: 1,
             }
         }
     ])
