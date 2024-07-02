@@ -232,9 +232,6 @@ const getMedia = asyncHandler(async (req, res) => {
             }
         },
         {
-            $unwind: "$reviews"
-        },
-        {
             $project: {
                 _id: 1,
                 name: 1,
