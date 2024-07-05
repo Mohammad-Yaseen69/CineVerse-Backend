@@ -45,11 +45,11 @@ const deleteReview = asyncHandler(async (req, res) => {
 
     const review = await Review.findById(reviewId);
 
-    if(!review){
+    if (!review) {
         throw new ApiError(404, "Review not found")
     }
 
-    if (review.user.toString() !== user._id.toString()) {
+    if (review.user.toString() !== user._id.toString() || !user.isAdmin) {
         throw new ApiError(401, "You are not authorized to delete this review");
     }
 
@@ -174,14 +174,15 @@ const listRecentReviews = asyncHandler(async (req, res) => {
             }
         },
         {
-            $limit: 10
+            $limit: 100
         },
         {
             $project: {
                 _id: 1,
                 review: 1,
                 media: 1,
-                user: 1
+                user: 1,
+                createdAt: 1
             }
         }
     ])

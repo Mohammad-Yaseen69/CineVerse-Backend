@@ -51,7 +51,7 @@ const validation = ({ name, description, cast, releaseYear, rating, duration, ge
         }
 
 
-        if (!["cast", "voiceActor", "writer", "directer"].includes(castObj.roleType)) {
+        if (!["cast", "voiceActor", "writer", "director"].includes(castObj.roleType)) {
             localPath && fs.unlinkSync(localPath)
             throw new ApiError(400, "Invalid role type. Must be 'cast', 'voiceActor', 'writer' or 'director'.")
         }
@@ -72,7 +72,6 @@ const createMedia = asyncHandler(async (req, res) => {
         parsedObject.genres = JSON.parse(genres)
     }
 
-    console.log(imgLocalPath, req.body)
 
     if (!imgLocalPath) {
         throw new ApiError(400, "Image is required")
@@ -265,13 +264,19 @@ const editMedia = asyncHandler(async (req, res) => {
     const user = req?.user
     const file = req?.file
 
-    if (cast, language, genres) {
-        req.body.cast = JSON.parse(cast)
-        req.body.language = JSON.parse(language)
-        req.body.genres = JSON.parse(genres)
+    let parsedObject = {}
+
+    if (cast && language && genres) {
+        parsedObject.cast = JSON.parse(cast)
+        parsedObject.language = JSON.parse(language)
+        parsedObject.genres = JSON.parse(genres)
     }
 
-    validation(req.body, user, file?.path)
+
+    validation({
+        ...req.body,
+        ...parsedObject
+    }, user, file?.path)
 
     const media = await Media.findById(id)
 
@@ -281,7 +286,7 @@ const editMedia = asyncHandler(async (req, res) => {
 
     let genresIds = []
 
-    for (const genreName of genres) {
+    for (const genreName of JSON.parse(genres)) {
         const genre = await Genre.findOne({ name: genreName })
 
         if (!genre) {
@@ -290,6 +295,8 @@ const editMedia = asyncHandler(async (req, res) => {
 
         genresIds.push(genre._id)
     }
+
+    parsedObject.genre = genresIds
 
     let img = {}
 
@@ -314,14 +321,12 @@ const editMedia = asyncHandler(async (req, res) => {
         {
             name,
             description,
-            cast,
             releaseYear: Number(releaseYear),
             rating: Number(rating),
+            img: file ? img : media.img,
             duration: type === "movie" ? duration : duration + " per EP",
-            genre: genresIds,
-            language,
             type,
-            img: file ? img : media.img
+            ...parsedObject,
         },
         { new: true }
     )
