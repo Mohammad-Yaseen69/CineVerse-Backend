@@ -86,7 +86,7 @@ const createMedia = asyncHandler(async (req, res) => {
 
     let genresIds = []
 
-    
+
 
     for (const genreName of JSON.parse(genres)) {
         const genre = await Genre.findOne({ name: genreName })
@@ -369,8 +369,8 @@ const getAllMedia = asyncHandler(async (req, res) => {
         },
         {
             $addFields: {
-                reviews : {
-                    $size : "$reviews"
+                reviews: {
+                    $size: "$reviews"
                 }
             }
         },
@@ -400,7 +400,7 @@ const getAllMedia = asyncHandler(async (req, res) => {
 })
 
 const searchMedia = asyncHandler(async (req, res) => {
-    const { sortType, page = 1, limit = 10, query, genres = [], releaseYear, sortBy } = req.query;
+    const { sortType, page = 1, limit = 10, type, query, genres = [], releaseYear, sortBy } = req.query;
 
 
     let pipeline = [];
@@ -438,6 +438,14 @@ const searchMedia = asyncHandler(async (req, res) => {
         });
     }
 
+    if(type){
+        pipeline.push({
+            $match: {
+                type: type
+            }
+        });
+    }
+
     // Handle release year filter
     if (releaseYear) {
         pipeline.push({
@@ -462,6 +470,29 @@ const searchMedia = asyncHandler(async (req, res) => {
         });
     }
 
+    pipeline.push(
+        {
+            $lookup: {
+                from: "genres",
+                localField: "genre",
+                foreignField: "_id",
+                as: "genre",
+                pipeline: [
+                    {
+                        $project: {
+                            _id: 0,
+                            name: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                genre: "$genre.name"
+            }
+        }
+    );
     // Handle search query
 
 
