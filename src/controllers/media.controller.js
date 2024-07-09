@@ -100,7 +100,7 @@ const createMedia = asyncHandler(async (req, res) => {
 
     parsedObject.genre = genresIds
 
-    console.log(parsedObject)
+    
 
     const imgFirebaseUrl = await uploadFile(imgLocalPath)
 
