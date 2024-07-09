@@ -115,8 +115,8 @@ const createMedia = asyncHandler(async (req, res) => {
     }
 
     const newMedia = await Media.create({
-        name,
-        description,
+        name: name.trim(),
+        description: description.trim(),
         releaseYear: Number(releaseYear),
         rating: Number(rating),
         duration: type === "movie" ? duration : duration + " per EP",
@@ -245,6 +245,7 @@ const getMedia = asyncHandler(async (req, res) => {
                 img: {
                     publicUrl: 1
                 },
+                reviews: 1
             }
         }
     ])
@@ -438,7 +439,7 @@ const searchMedia = asyncHandler(async (req, res) => {
         });
     }
 
-    if(type){
+    if (type) {
         pipeline.push({
             $match: {
                 type: type
