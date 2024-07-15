@@ -1,16 +1,12 @@
 {
-  "name": "backend",
+  "name": "CineVerse",
   "version": "1.0.0",
-  "description": "An AI ChatBot ",
+  "description": "Movie app",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
     "start": "node src/index.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Mohammad-Yaseen69/AI-ChatBot-Backend.git"
   },
   "author": "Yaseen",
   "license": "ISC",
